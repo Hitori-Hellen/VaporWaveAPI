@@ -30,7 +30,7 @@ namespace API_PBL.Controllers
                 .ToListAsync();
             return game;
         }
-        [HttpPost]
+        [HttpPost("Game")]
         public async Task<ActionResult<List<Game>>> Create(CreateGameDto request)
         {
             var newGame = new Game
@@ -38,9 +38,13 @@ namespace API_PBL.Controllers
                 Name = request.Name,
                 ReleaseDate = request.ReleaseDate,
                 AgeRating = request.AgeRating,
+                GameRating = request.GameRating,
                 Price = request.Price,
                 Description = request.Description,
-                Developer = request.Developer
+                Developer = request.Developer,
+                Publisher = request.Publisher,
+                Spec = request.Spec,
+                Website = request.Website
             };
 
             _context.Games.Add(newGame);
@@ -56,10 +60,47 @@ namespace API_PBL.Controllers
             var tag_temp = await _context.Tags.FindAsync(request.IdTag);
             if (tag_temp== null) { return NotFound(); }
 
-            _context.Tags.Add(tag_temp);
+            game_temp.Tags.Add(tag_temp);
             await _context.SaveChangesAsync();
 
             return Ok(game_temp);
+        }
+        [HttpPut]
+        public async Task<ActionResult<List<Game>>> UpdateGame(GameDto request)
+        {
+            var game_temp = await _context.Games.FindAsync(request.Id);
+            if(game_temp == null)
+            {
+                return BadRequest("Game not found");
+            }
+
+            game_temp.Name = request.Name;
+            game_temp.ReleaseDate = request.ReleaseDate;
+            game_temp.AgeRating = request.AgeRating;
+            game_temp.GameRating = request.GameRating;
+            game_temp.Price = request.Price;
+            game_temp.Description = request.Description;
+            game_temp.Developer = request.Developer;
+            game_temp.Publisher = request.Publisher;
+            game_temp.Website = request.Website;
+            game_temp.Spec = request.Spec;
+
+            await _context.SaveChangesAsync();
+            return Ok(game_temp);
+        }
+        [HttpDelete("{Id}")]
+        public async Task<ActionResult<List<Game>>> DeleteGame(int Id)
+        {
+            var game_temp = await _context.Games.FindAsync(Id);
+            if (game_temp == null)
+            {
+                return BadRequest("Game not found");
+            }
+            game_temp.Tags.RemoveAll(tag => tag.Id == Id);
+            _context.Games.Remove(game_temp);
+            
+            // Chua xong
+            return Ok(await _context.Games.Include(g => g.Tags).ToListAsync());
         }
     }
 }
