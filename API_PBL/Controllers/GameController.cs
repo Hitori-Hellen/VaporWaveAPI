@@ -23,16 +23,38 @@ namespace API_PBL.Controllers
             return Ok(await _context.Games.Include(g => g.Tags).ToListAsync());
         }
         [HttpGet("{GameId}")]
-        public async Task<ActionResult<List<Game>>> GetById(int GameId)
+        public async Task<ActionResult<GameDto>> GetById(int GameId)
         {
-            var game = await _context.Games
-                .Where(g => g.Id == GameId)
-                .Include(g => g.Tags)
-                .ToListAsync();
+            //var game = await _context.Games
+            //    .Where(g => g.Id == GameId)
+            //    .Include(g => g.Tags)
+            //    .ToListAsync();
 
-            // nen de image path vao trong database?
+            Game game = await _context.Games.FindAsync(GameId);
+            GameDto dto = new GameDto();
+            List<string> pathString = new List<string>();
+            dto.Id = game.Id;
+            dto.Name = game.Name;
+            dto.Description = game.Description;
+            dto.ReleaseDate = game.ReleaseDate;
+            dto.AgeRating = game.AgeRating;
+            dto.GameRating = game.GameRating;
+            dto.Price = game.Price;
+            dto.Developer = game.Developer;
+            dto.Publisher = game.Publisher;
+            dto.Website = game.Website;
+            dto.Spec = game.Spec;
+            //int fCount = Directory.GetFiles($"C:\\Users\\duong\\Downloads\\API_PBL-20220605T161930Z-001\\API_PBL\\API_PBL\\Image\\{GameId}\\", "+", SearchOption.AllDirectories).Length;
+            System.IO.DirectoryInfo dir = new System.IO.DirectoryInfo($"C:\\Users\\duong\\Downloads\\API_PBL-20220605T161930Z-001\\API_PBL\\API_PBL\\Image\\{GameId}\\");
+            int count = dir.GetFiles().Length;
+            dto.len = count;
 
-            return game;
+            for (int i = 1; i <= count; i++)
+            {
+                pathString.Add($"C:\\Users\\duong\\Downloads\\API_PBL-20220605T161930Z-001\\API_PBL\\API_PBL\\Image\\{GameId}\\{i}");
+            }
+            dto.Path = pathString;
+            return dto;
         }
         [HttpPost("Game")]
         public async Task<ActionResult<List<Game>>> Create(CreateGameDto request)
