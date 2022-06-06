@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using API_PBL.Models.DatabaseModels;
 using API_PBL.Models.DtoModels;
+using System.IO;
 
 namespace API_PBL.Controllers
 {
@@ -28,6 +29,9 @@ namespace API_PBL.Controllers
                 .Where(g => g.Id == GameId)
                 .Include(g => g.Tags)
                 .ToListAsync();
+
+            // nen de image path vao trong database?
+
             return game;
         }
         [HttpPost("Game")]

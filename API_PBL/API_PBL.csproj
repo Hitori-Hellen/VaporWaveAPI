@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Image\" />
+    <Resource Include="Image\H2x1_WiiUDS_HollowKnight.jpg" />
   </ItemGroup>
 
 </Project>
