@@ -13,5 +13,7 @@
         public string Publisher { get; set; }
         public string Website { get; set; }
         public string Spec { get; set; }
+        public int len { get; set; }
+        public List<string> Path { get; set; }
     }
 }
