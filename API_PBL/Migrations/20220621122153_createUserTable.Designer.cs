@@ -4,6 +4,7 @@ using API_PBL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API_PBL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220621122153_createUserTable")]
+    partial class createUserTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -106,36 +108,6 @@ namespace API_PBL.Migrations
                     b.ToTable("Games");
                 });
 
-            modelBuilder.Entity("API_PBL.Models.DatabaseModels.Receipt", b =>
-                {
-                    b.Property<int>("receiptId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("receiptId"), 1L, 1);
-
-                    b.Property<int>("gameId")
-                        .HasColumnType("int");
-
-                    b.Property<double>("gamePrice")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime>("purchaseDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("userId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("receiptId");
-
-                    b.HasIndex("gameId");
-
-                    b.HasIndex("userId");
-
-                    b.ToTable("Receipts");
-                });
-
             modelBuilder.Entity("API_PBL.Models.DatabaseModels.Tag", b =>
                 {
                     b.Property<int>("Id")
@@ -204,25 +176,6 @@ namespace API_PBL.Migrations
                         .HasForeignKey("userId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("API_PBL.Models.DatabaseModels.Receipt", b =>
-                {
-                    b.HasOne("API_PBL.Models.DatabaseModels.Game", "Game")
-                        .WithMany()
-                        .HasForeignKey("gameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API_PBL.Models.DatabaseModels.User", "User")
-                        .WithMany()
-                        .HasForeignKey("userId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Game");
 
                     b.Navigation("User");
                 });

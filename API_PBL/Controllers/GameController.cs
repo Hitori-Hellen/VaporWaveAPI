@@ -128,5 +128,6 @@ namespace API_PBL.Controllers
             // Chua xong
             return Ok(await _context.Games.Include(g => g.Tags).ToListAsync());
         }
+        
     }
 }

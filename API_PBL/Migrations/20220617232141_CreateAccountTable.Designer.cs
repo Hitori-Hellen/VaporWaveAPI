@@ -4,6 +4,7 @@ using API_PBL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API_PBL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220617232141_CreateAccountTable")]
+    partial class CreateAccountTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,21 +40,11 @@ namespace API_PBL.Migrations
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<string>("role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("userId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("username")
+                    b.Property<string>("userName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("userId");
 
                     b.ToTable("Accounts");
                 });
@@ -106,36 +98,6 @@ namespace API_PBL.Migrations
                     b.ToTable("Games");
                 });
 
-            modelBuilder.Entity("API_PBL.Models.DatabaseModels.Receipt", b =>
-                {
-                    b.Property<int>("receiptId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("receiptId"), 1L, 1);
-
-                    b.Property<int>("gameId")
-                        .HasColumnType("int");
-
-                    b.Property<double>("gamePrice")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime>("purchaseDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("userId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("receiptId");
-
-                    b.HasIndex("gameId");
-
-                    b.HasIndex("userId");
-
-                    b.ToTable("Receipts");
-                });
-
             modelBuilder.Entity("API_PBL.Models.DatabaseModels.Tag", b =>
                 {
                     b.Property<int>("Id")
@@ -153,35 +115,6 @@ namespace API_PBL.Migrations
                     b.ToTable("Tags");
                 });
 
-            modelBuilder.Entity("API_PBL.Models.DatabaseModels.User", b =>
-                {
-                    b.Property<string>("userId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("dateOfBirth")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("phone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("userName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("userWallet")
-                        .HasColumnType("float");
-
-                    b.HasKey("userId");
-
-                    b.ToTable("Users");
-                });
-
             modelBuilder.Entity("GameTag", b =>
                 {
                     b.Property<int>("GamesId")
@@ -195,36 +128,6 @@ namespace API_PBL.Migrations
                     b.HasIndex("TagsId");
 
                     b.ToTable("GameTag");
-                });
-
-            modelBuilder.Entity("API_PBL.Models.DatabaseModels.Account", b =>
-                {
-                    b.HasOne("API_PBL.Models.DatabaseModels.User", "User")
-                        .WithMany()
-                        .HasForeignKey("userId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("API_PBL.Models.DatabaseModels.Receipt", b =>
-                {
-                    b.HasOne("API_PBL.Models.DatabaseModels.Game", "Game")
-                        .WithMany()
-                        .HasForeignKey("gameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API_PBL.Models.DatabaseModels.User", "User")
-                        .WithMany()
-                        .HasForeignKey("userId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Game");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("GameTag", b =>
