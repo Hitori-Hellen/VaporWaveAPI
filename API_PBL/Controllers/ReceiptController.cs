@@ -8,6 +8,6 @@ namespace API_PBL.Controllers
     [ApiController]
     public class ReceiptController : ControllerBase
     {
-
+        
     }
 }

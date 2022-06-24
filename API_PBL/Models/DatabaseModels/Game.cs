@@ -19,6 +19,7 @@ namespace API_PBL.Models.DatabaseModels
         public string Spec { get; set; }
         public bool isLiked { get; set; } = false;
         public List<Tag> Tags { get; set; }
+        public List<Image> Images { get; set; }
 
     }
 }

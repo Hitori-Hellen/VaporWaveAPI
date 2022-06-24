@@ -25,11 +25,6 @@ namespace API_PBL.Controllers
         [HttpGet("{GameId}")]
         public async Task<ActionResult<GameDto>> GetById(int GameId)
         {
-            //var game = await _context.Games
-            //    .Where(g => g.Id == GameId)
-            //    .Include(g => g.Tags)
-            //    .ToListAsync();
-
             Game game = await _context.Games.FindAsync(GameId);
             GameDto dto = new GameDto();
             List<string> pathString = new List<string>();
@@ -44,20 +39,10 @@ namespace API_PBL.Controllers
             dto.Publisher = game.Publisher;
             dto.Website = game.Website;
             dto.Spec = game.Spec;
-            //int fCount = Directory.GetFiles($"C:\\Users\\duong\\Downloads\\API_PBL-20220605T161930Z-001\\API_PBL\\API_PBL\\Image\\{GameId}\\", "+", SearchOption.AllDirectories).Length;
-            System.IO.DirectoryInfo dir = new System.IO.DirectoryInfo($"C:\\Users\\duong\\Downloads\\API_PBL-20220605T161930Z-001\\API_PBL\\API_PBL\\Image\\{GameId}\\");
-            int count = dir.GetFiles().Length;
-            dto.len = count;
-
-            for (int i = 1; i <= count; i++)
-            {
-                pathString.Add($"C:\\Users\\duong\\Downloads\\API_PBL-20220605T161930Z-001\\API_PBL\\API_PBL\\Image\\{GameId}\\{i}");
-            }
-            dto.Path = pathString;
             return dto;
         }
         [HttpPost("Create Game")]
-        public async Task<ActionResult<List<Game>>> Create(CreateGameDto request)
+        public async Task<ActionResult> Create(CreateGameDto request)
         {
             var newGame = new Game
             {
@@ -85,7 +70,7 @@ namespace API_PBL.Controllers
                 gameTemp.Tags.Add(tagTemp);
             }
             await _context.SaveChangesAsync();
-            return Ok(await _context.Games.Include(g => g.Tags).ToListAsync());
+            return NoContent();
         }
         [HttpPut]
         public async Task<ActionResult<List<Game>>> UpdateGame(GameDto request)

@@ -8,16 +8,6 @@ namespace API_PBL.Data
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //modelBuilder.Entity<GameTag>()
-            //    .HasKey(m => new { m.IdGame, m.IdTag });
-            //modelBuilder.Entity<GameTag>()
-            //    .HasOne(m => m.Game)
-            //    .WithMany(c => c.GameTag)
-            //    .HasForeignKey(m => m.IdGame);
-            //modelBuilder.Entity<GameTag>()
-            //    .HasOne(m => m.Tag)
-            //    .WithMany(c => c.GameTag)
-            //    .HasForeignKey(m => m.IdTag);
         }
         public DbSet<Game> Games { get; set; }
         public DbSet<Tag> Tags { get; set; }
@@ -26,5 +16,6 @@ namespace API_PBL.Data
         public DbSet<Receipt> Receipts { get; set; }
         public DbSet<WishList> WishLists { get; set; }
         public DbSet<Library> Library { get; set; }
+        public DbSet<Image> Images { get; set; }
     }
 }
