@@ -17,7 +17,7 @@ namespace API_PBL.Models.DatabaseModels
         public string Publisher { get; set; }
         public string Website { get; set; }
         public string Spec { get; set; }
-        
+        public bool isLiked { get; set; } = false;
         public List<Tag> Tags { get; set; }
 
     }

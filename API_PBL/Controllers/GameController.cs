@@ -56,7 +56,7 @@ namespace API_PBL.Controllers
             dto.Path = pathString;
             return dto;
         }
-        [HttpPost("Game")]
+        [HttpPost("Create Game")]
         public async Task<ActionResult<List<Game>>> Create(CreateGameDto request)
         {
             var newGame = new Game
@@ -74,22 +74,18 @@ namespace API_PBL.Controllers
             };
 
             _context.Games.Add(newGame);
-            _context.SaveChangesAsync();
-
-            return Ok(newGame);
-        }
-        [HttpPost("GameTag")]
-        public async Task<ActionResult<List<Game>>> AddGameTag(AddGameTag request)
-        {
-            var game_temp = await _context.Games.Where(c => c.Id == request.IdGame).Include(c => c.Tags).FirstOrDefaultAsync();
-            if(game_temp == null) { return NotFound(); }
-            var tag_temp = await _context.Tags.FindAsync(request.IdTag);
-            if (tag_temp== null) { return NotFound(); }
-
-            game_temp.Tags.Add(tag_temp);
+            _context.SaveChanges();
+            var gameTemp = await _context.Games.Where(w => w.Name == request.Name).Include(c => c.Tags).FirstOrDefaultAsync();
+            if (gameTemp == null) { return NotFound(); }
+            List<string> tagGame = request.Tag.ToList();
+            foreach(var item in tagGame)
+            {
+                var tagTemp = _context.Tags.Where(w => w.tagName == item).FirstOrDefault();
+                if(tagTemp == null) { return NotFound(); }
+                gameTemp.Tags.Add(tagTemp);
+            }
             await _context.SaveChangesAsync();
-
-            return Ok(game_temp);
+            return Ok(await _context.Games.Include(g => g.Tags).ToListAsync());
         }
         [HttpPut]
         public async Task<ActionResult<List<Game>>> UpdateGame(GameDto request)
