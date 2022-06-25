@@ -12,6 +12,7 @@ namespace API_PBL.Models.DatabaseModels
         public string email { get; set; }
         public string phone { get; set; }
         public double userWallet { get; set; }
+        public string imageName { get; set; }
         [JsonIgnore]
         public WishList WishList { get; set; }
         [JsonIgnore]

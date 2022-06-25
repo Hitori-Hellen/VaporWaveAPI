@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace API_PBL.Models.DatabaseModels
 {
@@ -7,6 +8,7 @@ namespace API_PBL.Models.DatabaseModels
         [Key]
         public int Id { get; set; }
         public string imageName { get; set; }
+        [JsonIgnore]
         public Game Game { get; set; }
         public int gameId { get; set; }
     }
