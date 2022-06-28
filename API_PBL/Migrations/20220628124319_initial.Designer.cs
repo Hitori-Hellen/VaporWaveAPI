@@ -12,14 +12,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API_PBL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220622220525_addMoreTable")]
-    partial class addMoreTable
+    [Migration("20220628124319_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.5")
+                .HasAnnotation("ProductVersion", "6.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -106,21 +106,56 @@ namespace API_PBL.Migrations
                     b.Property<bool>("isLiked")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("isPayed")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.ToTable("Games");
                 });
 
+            modelBuilder.Entity("API_PBL.Models.DatabaseModels.Image", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("gameId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("imageName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("gameId");
+
+                    b.ToTable("Images");
+                });
+
             modelBuilder.Entity("API_PBL.Models.DatabaseModels.Library", b =>
                 {
-                    b.Property<string>("userId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"), 1L, 1);
 
                     b.Property<string>("gameName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("userId");
+                    b.Property<string>("userId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("userId")
+                        .IsUnique();
 
                     b.ToTable("Library");
                 });
@@ -185,6 +220,10 @@ namespace API_PBL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("imageName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("phone")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -241,13 +280,26 @@ namespace API_PBL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("API_PBL.Models.DatabaseModels.Image", b =>
+                {
+                    b.HasOne("API_PBL.Models.DatabaseModels.Game", "Game")
+                        .WithMany("Images")
+                        .HasForeignKey("gameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+                });
+
             modelBuilder.Entity("API_PBL.Models.DatabaseModels.Library", b =>
                 {
-                    b.HasOne("API_PBL.Models.DatabaseModels.User", null)
+                    b.HasOne("API_PBL.Models.DatabaseModels.User", "User")
                         .WithOne("Library")
                         .HasForeignKey("API_PBL.Models.DatabaseModels.Library", "userId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("API_PBL.Models.DatabaseModels.Receipt", b =>
@@ -291,6 +343,11 @@ namespace API_PBL.Migrations
                         .HasForeignKey("TagsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("API_PBL.Models.DatabaseModels.Game", b =>
+                {
+                    b.Navigation("Images");
                 });
 
             modelBuilder.Entity("API_PBL.Models.DatabaseModels.User", b =>

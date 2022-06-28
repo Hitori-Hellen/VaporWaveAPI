@@ -6,6 +6,9 @@ using API_PBL.Models.DatabaseModels;
 using API_PBL.Models.DtoModels;
 using System.IO;
 using API_PBL.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Office.Interop.Excel;
+
 
 namespace API_PBL.Controllers
 {
@@ -25,26 +28,61 @@ namespace API_PBL.Controllers
         {
             return Ok(await _context.Games.Include(g => g.Tags).ToListAsync());
         }
-        //[HttpGet("getHomeGame")]
-        //public async Task<ActionResult<List<GameHomePageDto>>> GetAllGame(string request)
-        //{
-        //    List<GameHomePageDto> resultList = new List<GameHomePageDto>();
-        //    if(request == "All")
-        //    {
-        //        var games = _context.Games.Include(g => g.Tags).ToList();
-        //        foreach (var item in games)
-        //        {
-        //            var tagGame = item.Tags.First();
-        //            var temp = new GameHomePageDto
-        //            {
-        //                gameName = item.Name,
-        //                gameTag = tagGame.tagName,
+        [HttpGet("{tagName}")]
+        public async Task<ActionResult<List<GameHomePageDto>>> GetAllGame(string tagName)
+        {
+            List<GameHomePageDto> resultList = new List<GameHomePageDto>();
+            if (tagName == "All")
+            {
+                var games = _context.Games.Include(g => g.Tags).ToList();
+                foreach (var item in games)
+                {
+                    var listTag = item.Tags.First();
+                    var images = _context.Images.Where(w => w.gameId == item.Id).First();
+                    
+                    GameHomePageDto game = new GameHomePageDto
+                    {
+                        gameName = item.Name,
+                        gamePrice = item.Price,
+                        gameTag = listTag.tagName,
+                        gameImageUrl = _blobService.GetBlob(images.imageName,"images")
+                    };
+                    resultList.Add(game);
+                }
 
-        //            };
-        //        }
-        //    }
-        //}
-        [HttpGet("{GameId}")]
+                return resultList;
+            }
+            else
+            { 
+                var games = _context.Games.Include(g => g.Tags).ToList();
+                foreach (var item in games)
+                {
+                    var tagRequest = item.Tags.Where(t => t.tagName == tagName).FirstOrDefault();
+                    if (tagRequest != null)
+                    {
+                        var images = _context.Images.Where(w => w.gameId == item.Id).First();
+                    
+                        GameHomePageDto game = new GameHomePageDto
+                        {
+                            gameName = item.Name,
+                            gamePrice = item.Price,
+                            gameTag = tagName,
+                            gameImageUrl = _blobService.GetBlob(images.imageName,"images")
+                        };
+                        resultList.Add(game);
+                    }
+                }
+                if(resultList == null)
+                {
+                    return BadRequest("Error!");
+                }
+                else
+                {
+                    return resultList;
+                }
+            }
+        }
+        [HttpGet("home/{GameId}")]
         public async Task<ActionResult<GameDto>> GetById(int GameId)
         {
             Game game = await _context.Games.FindAsync(GameId);
@@ -61,6 +99,18 @@ namespace API_PBL.Controllers
             dto.Publisher = game.Publisher;
             dto.Website = game.Website;
             dto.Spec = game.Spec;
+            var games = _context.Games.Include(g => g.Tags).Where(w => w.Id == GameId).ToList();
+            List<string> gametags = new List<string>();
+            foreach(var item in games)
+            {
+                var listTag = item.Tags.ToList();
+                foreach (var tag in listTag)
+                {
+                    gametags.Add(tag.tagName);
+                }
+            }
+
+            dto.Tag = gametags;
             var images = _context.Images.Where(w => w.gameId == game.Id).ToList();
             List<string> url = new List<string>();
             foreach (var item in images)
@@ -71,8 +121,8 @@ namespace API_PBL.Controllers
             dto.Path = url;
             return dto;
         }
-        [HttpPost("Create Game")]
-        public async Task<ActionResult> Create(CreateGameDto request)
+        [HttpPost("Create Game"), Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Create(CreateGameDto request)
         {
             var newGame = new Game
             {
@@ -89,7 +139,7 @@ namespace API_PBL.Controllers
             };
 
             _context.Games.Add(newGame);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             var gameTemp = await _context.Games.Where(w => w.Name == request.Name).Include(c => c.Tags).FirstOrDefaultAsync();
             if (gameTemp == null) { return NotFound(); }
             List<string> tagGame = request.Tag.ToList();
@@ -100,9 +150,9 @@ namespace API_PBL.Controllers
                 gameTemp.Tags.Add(tagTemp);
             }
             await _context.SaveChangesAsync();
-            return NoContent();
+            return Ok("Create successful");
         }
-        [HttpPut]
+        [HttpPut("UpdateGameInformation"), Authorize(Roles = "Admin")]
         public async Task<ActionResult<List<Game>>> UpdateGame(GameDto request)
         {
             var game_temp = await _context.Games.FindAsync(request.Id);
@@ -121,11 +171,22 @@ namespace API_PBL.Controllers
             game_temp.Publisher = request.Publisher;
             game_temp.Website = request.Website;
             game_temp.Spec = request.Spec;
+            
+            await _context.SaveChangesAsync();
+            var gameTemp = await _context.Games.Where(w => w.Name == request.Name).Include(c => c.Tags).FirstOrDefaultAsync();
+            if (gameTemp == null) { return NotFound(); }
+            List<string> tagGame = request.Tag.ToList();
+            foreach(var item in tagGame)
+            {
+                var tagTemp = _context.Tags.Where(w => w.tagName == item).FirstOrDefault();
+                if(tagTemp == null) { return NotFound(); }
+                gameTemp.Tags.Add(tagTemp);
+            }
 
             await _context.SaveChangesAsync();
             return Ok(game_temp);
         }
-        [HttpPut("Image")]
+        [HttpPut("Image"), Authorize(Roles = "Admin")]
         public async Task<IActionResult> updateImageForGame(string gameName, IFormFile file)
         {
             var game = _context.Games.Where(w => w.Name == gameName).FirstOrDefault();
@@ -136,19 +197,17 @@ namespace API_PBL.Controllers
             }
             return Ok("Successfully");
         }
-        [HttpDelete("{Id}")]
-        public async Task<ActionResult<List<Game>>> DeleteGame(int Id)
+        [HttpDelete("{Id}"), Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteGame(int Id)
         {
-            var game_temp = await _context.Games.FindAsync(Id);
-            if (game_temp == null)
+            var gameTemp = await _context.Games.FindAsync(Id);
+            if (gameTemp == null)
             {
                 return BadRequest("Game not found");
             }
-            game_temp.Tags.RemoveAll(tag => tag.Id == Id);
-            _context.Games.Remove(game_temp);
-            
-            // Chua xong
-            return Ok(await _context.Games.Include(g => g.Tags).ToListAsync());
+            _context.Games.Remove(gameTemp);
+            await _context.SaveChangesAsync();
+            return Ok("Delete Successfully");
         }
         private async Task<bool> AddImage(int gameId,IFormFile file)
         {           

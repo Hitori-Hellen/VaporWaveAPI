@@ -17,7 +17,7 @@ namespace API_PBL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.5")
+                .HasAnnotation("ProductVersion", "6.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -102,6 +102,9 @@ namespace API_PBL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("isLiked")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isPayed")
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
@@ -288,11 +291,13 @@ namespace API_PBL.Migrations
 
             modelBuilder.Entity("API_PBL.Models.DatabaseModels.Library", b =>
                 {
-                    b.HasOne("API_PBL.Models.DatabaseModels.User", null)
+                    b.HasOne("API_PBL.Models.DatabaseModels.User", "User")
                         .WithOne("Library")
                         .HasForeignKey("API_PBL.Models.DatabaseModels.Library", "userId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("API_PBL.Models.DatabaseModels.Receipt", b =>

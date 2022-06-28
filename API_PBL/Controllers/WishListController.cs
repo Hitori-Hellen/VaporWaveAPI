@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using API_PBL.Models.DatabaseModels;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API_PBL.Controllers
@@ -7,5 +8,6 @@ namespace API_PBL.Controllers
     [ApiController]
     public class WishListController : ControllerBase
     {
+        
     }
 }

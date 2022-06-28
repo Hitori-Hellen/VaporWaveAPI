@@ -18,6 +18,26 @@ namespace API_PBL.Controllers
             _context = context;
             _blobService = blobService;
         }
+
+        [HttpGet("getAllUser"), Authorize(Roles = "Admin")]
+        public async Task<ActionResult<List<UserAdminDto>>> getAllUser()
+        {
+            List<UserAdminDto> userAdminDtos = new List<UserAdminDto>();
+            var users = _context.Users.ToList();
+            foreach (var item in users)
+            {
+                var user = new UserAdminDto
+                {
+                    userName = item.userName,
+                    email = item.email,
+                    phone = item.phone,
+                    imageName = item.imageName
+                };
+                userAdminDtos.Add(user);
+            }
+
+            return userAdminDtos;
+        }
         [HttpGet("userHomepage"), Authorize(Roles = "User")]
         public async Task<ActionResult<UserHomePageDto>> getUserInformation(string userName)
         {
@@ -25,6 +45,10 @@ namespace API_PBL.Controllers
             var responseUser = new UserHomePageDto
             {
                 userName = userName,
+                email = user.email,
+                phone = user.phone,
+                dateOfBirth = user.dateOfBirth,
+                userWallet = user.userWallet,
                 imageUri = _blobService.GetBlob(user.imageName, "images")
             };
             return responseUser;

@@ -29,7 +29,7 @@ namespace API_PBL.Controllers
             }
         }
         [HttpPost("register")]
-        public async Task<ActionResult<List<Account>>> registerAccount(registerAccount request)
+        public async Task<IActionResult> registerAccount(registerAccount request)
         {
             Random rand = new Random();
             String randomId = rand.Next(100000, 999999).ToString();
@@ -40,7 +40,8 @@ namespace API_PBL.Controllers
                 dateOfBirth = String.Empty,
                 email = String.Empty,
                 phone = String.Empty,
-                userWallet = 0
+                userWallet = 0,
+                imageName = String.Empty
             };
             _dbcontext.Users.Add(user);
             _dbcontext.SaveChanges();
@@ -55,7 +56,7 @@ namespace API_PBL.Controllers
             };
             _dbcontext.Accounts.Add(accountTemp);
             await _dbcontext.SaveChangesAsync();
-            return Ok(await _dbcontext.Accounts.ToListAsync());
+            return Ok("Successful");
         }
         [HttpGet]
         public async Task<ActionResult<List<Account>>> getAllAccounts()
@@ -82,7 +83,6 @@ namespace API_PBL.Controllers
             {
                 return BadRequest("Username or Password is Wrong!");
             }
-            //return Ok("Welcome back " + userLogin.username);
             string token = createToken(userLogin);
             return Ok(token);
         }
