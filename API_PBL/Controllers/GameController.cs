@@ -82,10 +82,10 @@ namespace API_PBL.Controllers
                 }
             }
         }
-        [HttpGet("home/{GameId}")]
-        public async Task<ActionResult<GameDto>> GetById(int GameId)
+        [HttpGet("GameName")]
+        public async Task<ActionResult<GameDto>> GetByName(string gameName)
         {
-            Game game = await _context.Games.FindAsync(GameId);
+            var game = _context.Games.Where(w => w.Name == gameName).FirstOrDefault();
             GameDto dto = new GameDto();
             List<string> pathString = new List<string>();
             dto.Id = game.Id;
@@ -99,7 +99,7 @@ namespace API_PBL.Controllers
             dto.Publisher = game.Publisher;
             dto.Website = game.Website;
             dto.Spec = game.Spec;
-            var games = _context.Games.Include(g => g.Tags).Where(w => w.Id == GameId).ToList();
+            var games = _context.Games.Include(g => g.Tags).Where(w => w.Id == game.Id).ToList();
             List<string> gametags = new List<string>();
             foreach(var item in games)
             {
@@ -153,7 +153,7 @@ namespace API_PBL.Controllers
             return Ok("Create successful");
         }
         [HttpPut("UpdateGameInformation"), Authorize(Roles = "Admin")]
-        public async Task<ActionResult<List<Game>>> UpdateGame(GameDto request)
+        public async Task<IActionResult> UpdateGame(GameDto request)
         {
             var game_temp = await _context.Games.FindAsync(request.Id);
             if(game_temp == null)
@@ -184,7 +184,7 @@ namespace API_PBL.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return Ok(game_temp);
+            return Ok("Update successfully");
         }
         [HttpPut("Image"), Authorize(Roles = "Admin")]
         public async Task<IActionResult> updateImageForGame(string gameName, IFormFile file)
