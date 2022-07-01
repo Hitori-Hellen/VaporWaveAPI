@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API_PBL.Models.DatabaseModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Office.Interop.Excel;
@@ -20,13 +21,13 @@ namespace API_PBL.Controllers
         {
             _context = context;
         }
-        [HttpGet]
+        [HttpGet, Authorize(Roles = "Admin")]
         public async Task<ActionResult<List<Tag>>> get()
         {
             return Ok(await _context.Tags.ToListAsync());
         }
 
-        [HttpPost]
+        [HttpPost, Authorize(Roles = "Admin")]
         public async Task<IActionResult> create(string request)
         {
             var tag = new Tag
@@ -35,12 +36,6 @@ namespace API_PBL.Controllers
             };
             _context.Tags.Add(tag);
             await _context.SaveChangesAsync();
-            return NoContent();
-        }
-
-        [HttpGet("ExcelFile")]
-        public async Task<IActionResult> getTagByFile(IFormFile file)
-        {
             return NoContent();
         }
     }

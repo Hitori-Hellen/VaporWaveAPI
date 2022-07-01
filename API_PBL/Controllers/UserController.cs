@@ -53,6 +53,12 @@ namespace API_PBL.Controllers
             };
             return responseUser;
         }
+        [HttpGet("Users")]
+        public async Task<ActionResult<int>> GetAllUserRegistered()
+        {
+            int allUser = _context.Users.Count();
+            return allUser;
+        }
         [HttpPost("Information"), Authorize(Roles = "User")]
         public async Task<ActionResult<User>> updateInformation(UserDto request){
             User user = _context.Users.Where(w => w.userName == request.userName).FirstOrDefault();

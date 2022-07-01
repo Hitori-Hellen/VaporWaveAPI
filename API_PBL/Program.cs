@@ -51,7 +51,7 @@ builder.Services.AddAzureClients(clientBuilder =>
     clientBuilder.AddBlobServiceClient(builder.Configuration["ConnectionStrings:BlobConnection:blob"], preferMsi: true);
     clientBuilder.AddQueueServiceClient(builder.Configuration["ConnectionStrings:BlobConnection:queue"], preferMsi: true);
 });
-
+builder.Services.AddScoped<IEmailService, EmailService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

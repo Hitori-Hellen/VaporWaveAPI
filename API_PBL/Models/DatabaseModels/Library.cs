@@ -8,6 +8,7 @@ namespace API_PBL.Models.DatabaseModels
         [Key]
         public int id { get; set; }
         public string gameName { get; set; }
+        public string userName { get; set; }
         [JsonIgnore]
         public User User { get; set; }
         public string userId { get; set; }

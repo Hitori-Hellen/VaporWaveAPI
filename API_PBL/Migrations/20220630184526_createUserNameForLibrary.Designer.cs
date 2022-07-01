@@ -4,6 +4,7 @@ using API_PBL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API_PBL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220630184526_createUserNameForLibrary")]
+    partial class createUserNameForLibrary
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -156,7 +158,8 @@ namespace API_PBL.Migrations
 
                     b.HasKey("id");
 
-                    b.HasIndex("userId");
+                    b.HasIndex("userId")
+                        .IsUnique();
 
                     b.ToTable("Library");
                 });
@@ -241,6 +244,20 @@ namespace API_PBL.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("API_PBL.Models.DatabaseModels.WishList", b =>
+                {
+                    b.Property<string>("userId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("gameName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("userId");
+
+                    b.ToTable("WishLists");
+                });
+
             modelBuilder.Entity("GameTag", b =>
                 {
                     b.Property<int>("GamesId")
@@ -281,8 +298,8 @@ namespace API_PBL.Migrations
             modelBuilder.Entity("API_PBL.Models.DatabaseModels.Library", b =>
                 {
                     b.HasOne("API_PBL.Models.DatabaseModels.User", "User")
-                        .WithMany()
-                        .HasForeignKey("userId")
+                        .WithOne("Library")
+                        .HasForeignKey("API_PBL.Models.DatabaseModels.Library", "userId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -308,6 +325,15 @@ namespace API_PBL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("API_PBL.Models.DatabaseModels.WishList", b =>
+                {
+                    b.HasOne("API_PBL.Models.DatabaseModels.User", null)
+                        .WithOne("WishList")
+                        .HasForeignKey("API_PBL.Models.DatabaseModels.WishList", "userId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("GameTag", b =>
                 {
                     b.HasOne("API_PBL.Models.DatabaseModels.Game", null)
@@ -326,6 +352,15 @@ namespace API_PBL.Migrations
             modelBuilder.Entity("API_PBL.Models.DatabaseModels.Game", b =>
                 {
                     b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("API_PBL.Models.DatabaseModels.User", b =>
+                {
+                    b.Navigation("Library")
+                        .IsRequired();
+
+                    b.Navigation("WishList")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

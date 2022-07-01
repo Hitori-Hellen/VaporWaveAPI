@@ -14,7 +14,6 @@ namespace API_PBL.Data
         public DbSet<Account> Accounts { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Receipt> Receipts { get; set; }
-        public DbSet<WishList> WishLists { get; set; }
         public DbSet<Library> Library { get; set; }
         public DbSet<Image> Images { get; set; }
     }

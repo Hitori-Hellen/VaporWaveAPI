@@ -42,6 +42,7 @@ namespace API_PBL.Controllers
                     
                     GameHomePageDto game = new GameHomePageDto
                     {
+                        gameId = item.Id,
                         gameName = item.Name,
                         gamePrice = item.Price,
                         gameTag = listTag.tagName,
@@ -64,6 +65,7 @@ namespace API_PBL.Controllers
                     
                         GameHomePageDto game = new GameHomePageDto
                         {
+                            gameId=item.Id,
                             gameName = item.Name,
                             gamePrice = item.Price,
                             gameTag = tagName,
@@ -82,10 +84,10 @@ namespace API_PBL.Controllers
                 }
             }
         }
-        [HttpGet("GameName")]
-        public async Task<ActionResult<GameDto>> GetByName(string gameName)
+        [HttpGet("gameId")]
+        public async Task<ActionResult<GameDto>> GetByGameId(int gameId)
         {
-            var game = _context.Games.Where(w => w.Name == gameName).FirstOrDefault();
+            var game = _context.Games.Where(w => w.Id == gameId).FirstOrDefault();
             GameDto dto = new GameDto();
             List<string> pathString = new List<string>();
             dto.Id = game.Id;
@@ -101,7 +103,7 @@ namespace API_PBL.Controllers
             dto.Spec = game.Spec;
             var games = _context.Games.Include(g => g.Tags).Where(w => w.Id == game.Id).ToList();
             List<string> gametags = new List<string>();
-            foreach(var item in games)
+            foreach (var item in games)
             {
                 var listTag = item.Tags.ToList();
                 foreach (var tag in listTag)
@@ -121,9 +123,44 @@ namespace API_PBL.Controllers
             dto.Path = url;
             return dto;
         }
+        [HttpGet("search")]
+        public async Task<ActionResult<List<GameHomePageDto>>> Search(string gameName)
+        {
+            var games = _context.Games.Include(g => g.Tags).ToList();
+            List<GameHomePageDto> resultList = new List<GameHomePageDto>();
+            foreach (var item in games)
+            {
+                string itemName = item.Name.ToLower();
+                if ((itemName).Contains(gameName.ToLower()) == true)
+                {
+                    var listTag = item.Tags.First();
+                    var images = _context.Images.Where(w => w.gameId == item.Id).First();
+
+                    GameHomePageDto game = new GameHomePageDto
+                    {
+                        gameId = item.Id,
+                        gameName = item.Name,
+                        gamePrice = item.Price,
+                        gameTag = listTag.tagName,
+                        gameImageUrl = _blobService.GetBlob(images.imageName, "images")
+                    };
+                    resultList.Add(game);
+                }
+            }
+            if (resultList == null)
+            {
+                return BadRequest(gameName + "not found");
+            }
+            return resultList;
+        }
         [HttpPost("Create Game"), Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(CreateGameDto request)
         {
+            var games = _context.Games.Where(w => w.Name == request.Name).FirstOrDefault();
+            if(games != null)
+            {
+                return BadRequest("Game is exist");
+            }
             var newGame = new Game
             {
                 Name = request.Name,
