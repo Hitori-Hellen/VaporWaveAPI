@@ -33,20 +33,20 @@ namespace API_PBL.Controllers
         {
             List<GameHomePageDto> resultList = new List<GameHomePageDto>();
             if (tagName == "All")
-            {
+            { 
                 var games = _context.Games.Include(g => g.Tags).ToList();
                 foreach (var item in games)
                 {
                     var listTag = item.Tags.First();
                     var images = _context.Images.Where(w => w.gameId == item.Id).First();
-                    
+
                     GameHomePageDto game = new GameHomePageDto
                     {
                         gameId = item.Id,
                         gameName = item.Name,
                         gamePrice = item.Price,
                         gameTag = listTag.tagName,
-                        gameImageUrl = _blobService.GetBlob(images.imageName,"images")
+                        gameImageUrl = _blobService.GetBlob(images.imageName, "images")
                     };
                     resultList.Add(game);
                 }
@@ -54,7 +54,7 @@ namespace API_PBL.Controllers
                 return resultList;
             }
             else
-            { 
+            {
                 var games = _context.Games.Include(g => g.Tags).ToList();
                 foreach (var item in games)
                 {
@@ -62,19 +62,19 @@ namespace API_PBL.Controllers
                     if (tagRequest != null)
                     {
                         var images = _context.Images.Where(w => w.gameId == item.Id).First();
-                    
+
                         GameHomePageDto game = new GameHomePageDto
                         {
-                            gameId=item.Id,
+                            gameId = item.Id,
                             gameName = item.Name,
                             gamePrice = item.Price,
                             gameTag = tagName,
-                            gameImageUrl = _blobService.GetBlob(images.imageName,"images")
+                            gameImageUrl = _blobService.GetBlob(images.imageName, "images")
                         };
                         resultList.Add(game);
                     }
                 }
-                if(resultList == null)
+                if (resultList == null)
                 {
                     return BadRequest("Error!");
                 }
@@ -88,6 +88,51 @@ namespace API_PBL.Controllers
         public async Task<ActionResult<GameDto>> GetByGameId(int gameId)
         {
             var game = _context.Games.Where(w => w.Id == gameId).FirstOrDefault();
+            GameDto dto = new GameDto();
+            List<string> pathString = new List<string>();
+            dto.Id = game.Id;
+            dto.Name = game.Name;
+            dto.Description = game.Description;
+            dto.ReleaseDate = game.ReleaseDate;
+            dto.AgeRating = game.AgeRating;
+            dto.GameRating = game.GameRating;
+            dto.Price = game.Price;
+            dto.Developer = game.Developer;
+            dto.Publisher = game.Publisher;
+            dto.Website = game.Website;
+            dto.Spec = game.Spec;
+            var games = _context.Games.Include(g => g.Tags).Where(w => w.Id == game.Id).ToList();
+            List<string> gametags = new List<string>();
+            foreach (var item in games)
+            {
+                var listTag = item.Tags.ToList();
+                foreach (var tag in listTag)
+                {
+                    gametags.Add(tag.tagName);
+                }
+            }
+
+            dto.Tag = gametags;
+            var images = _context.Images.Where(w => w.gameId == game.Id).ToList();
+            List<string> url = new List<string>();
+            foreach (var item in images)
+            {
+                var res = _blobService.GetBlob(item.imageName, "images");
+                url.Add(res);
+            }
+            dto.Path = url;
+            return dto;
+        }
+        [HttpGet("user/gameId")]
+        public async Task<ActionResult<GameDto>> GetByGameIdWithCheck(string userName ,int gameId)
+        {
+            var game = _context.Games.Where(w => w.Id == gameId).FirstOrDefault();
+            var user = _context.Users.Where(w => w.userName == userName).FirstOrDefault();
+            var library = _context.Library.Where(w => w.gameName == game.Name && w.userName == user.userName).FirstOrDefault();
+            if(library != null)
+            {
+                return BadRequest("Game is payup");
+            }
             GameDto dto = new GameDto();
             List<string> pathString = new List<string>();
             dto.Id = game.Id;
@@ -157,10 +202,6 @@ namespace API_PBL.Controllers
         public async Task<IActionResult> Create(CreateGameDto request)
         {
             var games = _context.Games.Where(w => w.Name == request.Name).FirstOrDefault();
-            if(games != null)
-            {
-                return BadRequest("Game is exist");
-            }
             var newGame = new Game
             {
                 Name = request.Name,

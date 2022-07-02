@@ -19,24 +19,38 @@ namespace API_PBL.Controllers
             _blobService = blobService;
         }
         [HttpGet("getLibrary"),Authorize(Roles = "User")]
-        public async Task<ActionResult<List<Game>>> getAllGameIsBought(string userName)
+        public async Task<ActionResult<List<GameHomePageDto>>> getAllGameIsBought(string userName)
         {
             var user = _context.Users.Where(w => w.userName == userName).FirstOrDefault();
             List<Receipt> receipt = _context.Receipts.Where(w => w.userId == user.userId).ToList();
-            List<Game> result = new List<Game>();
+            List<Game> gameList = new List<Game>();
             foreach (var item in receipt)
             {
-                Game game = _context.Games.Find(item.gameId);
-                game.isPayed = true;
-                result.Add(game);
+                Game game = _context.Games.Where(w => w.Id == item.gameId).Include(g => g.Tags).FirstOrDefault();
+                gameList.Add(game);
             }
+            List<GameHomePageDto> resultList = new List<GameHomePageDto>();
+            foreach(var item in gameList)
+            {
+                var listTag = item.Tags.First();
+                var images = _context.Images.Where(w => w.gameId == item.Id).First();
 
-            return result;
+                GameHomePageDto game = new GameHomePageDto
+                {
+                    gameId = item.Id,
+                    gameName = item.Name,
+                    gamePrice = item.Price,
+                    gameTag = listTag.tagName,
+                    gameImageUrl = _blobService.GetBlob(images.imageName, "images")
+                };
+                resultList.Add(game);
+            }
+            return resultList;
         }
         [HttpGet("getInfomation")]
-        public async Task<ActionResult<GameLibraryDto>> getGameInfomation(string gameName)
+        public async Task<ActionResult<GameLibraryDto>> getGameInfomation(int gameId)
         {
-            var game = _context.Games.Where(w => w.Name == gameName).FirstOrDefault();
+            var game = _context.Games.Where(w => w.Id == gameId).FirstOrDefault();
             GameLibraryDto dto = new GameLibraryDto();
             List<string> pathString = new List<string>();
             dto.Name = game.Name;
@@ -50,7 +64,7 @@ namespace API_PBL.Controllers
             dto.Website = game.Website;
             dto.Spec = game.Spec;
             dto.isPayed = true;
-            var games = _context.Games.Include(g => g.Tags).Where(w => w.Name == gameName).ToList();
+            var games = _context.Games.Include(g => g.Tags).Where(w => w.Name == game.Name).ToList();
             List<string> gametags = new List<string>();
             foreach(var item in games)
             {
